@@ -14,9 +14,9 @@ module PngQuantizator
       @file_path = file_path
     end
 
-    def quantize!(colors = 256)
+    def quantize!(opts = {})
       Tempfile.open([SecureRandom.hex(16), ".png"]) do |temp_path|
-        res = quantize_to(temp_path, colors)
+        res = quantize_to(temp_path, opts)
         FileUtils.cp(temp_path, @file_path)
 
         temp_path.close
@@ -25,10 +25,10 @@ module PngQuantizator
       end
     end
 
-    def quantize_to(destination_path, colors = 256)
+    def quantize_to(destination_path, opts = {})
       raise PngQuantError, "pngquant not found in PATH=#{ENV['PATH']}" unless which("pngquant")
 
-      exit_code, err_msg = Open3.popen3("pngquant #{colors}") do |stdin, stdout, stderr, wait_thr|
+      exit_code, err_msg = Open3.popen3("pngquant #{opts[:command_options]}") do |stdin, stdout, stderr, wait_thr|
         stdin.write(File.read(@file_path))
         stdin.close
 
