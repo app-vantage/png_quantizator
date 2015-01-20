@@ -28,7 +28,7 @@ module PngQuantizator
     def quantize_to(destination_path, opts = {})
       raise PngQuantError, "pngquant not found in PATH=#{ENV['PATH']}" unless which("pngquant")
 
-      exit_code, err_msg = Open3.popen3("pngquant #{opts[:command_options]}") do |stdin, stdout, stderr, wait_thr|
+      exit_code, err_msg = Open3.popen3("pngquant #{opts[:command_options]} -") do |stdin, stdout, stderr, wait_thr|
         stdin.write(File.read(@file_path))
         stdin.close
 
@@ -40,7 +40,7 @@ module PngQuantizator
         [wait_thr.value, stderr.gets(nil)]
       end
 
-      raise(PngQuantError, err_msg) if exit_code != 0
+      raise(PngQuantError, err_msg) unless [0, 99].include?(exit_code.exitstatus)
       true
     end
 
